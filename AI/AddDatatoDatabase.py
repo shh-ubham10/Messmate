@@ -51,17 +51,7 @@ data = {
             "standing": "G",
             "year": 4,
             "last_attendance_time": "2024-7-7 00:54:34"
-        },
-                   "10321210132":
-        {
-            "name": "Ritu Manchanda",
-            "major": "Computer science",
-            "starting_year": 2021,
-            "total_attendance": 5,
-            "standing": "G",
-            "year": 4,
-            "last_attendance_time": "2024-7-7 00:54:34"
-        },
+        }
         
 }
 
