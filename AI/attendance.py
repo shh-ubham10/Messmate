@@ -4,7 +4,6 @@ import pickle
 import numpy as np
 import cv2
 import face_recognition
-import cvzone
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
@@ -14,8 +13,9 @@ from datetime import datetime,time
 
 # Define time slots for meals
 breakfast_time = (time(8, 0), time(9, 30))
-lunch_time = (time(12, 30), time(2, 0))
-dinner_time = (time(20, 0), time(22, 30))
+lunch_time = (time(12, 30), time(14, 0))
+snack_time = (time(17,0), time(20,5))
+dinner_time = (time(20, 20), time(21, 30))
 
 
 # Firebase Setup
@@ -68,9 +68,15 @@ def get_meal_slot(current_time):
         return 0  # Breakfast
     elif is_within_time_range(current_time, *lunch_time):
         return 1  # Lunch
+    elif is_within_time_range(current_time, *snack_time):
+        return 2  # Snack
     elif is_within_time_range(current_time, *dinner_time):
-        return 2  # Dinner
+        return 3  # Dinner
     return None  # Not in meal time
+
+
+# Add a dictionary to track whether attendance is already marked for a student during a specific meal slot
+marked_attendance = {}
 
 while True:
     success, img = cap.read()
@@ -100,6 +106,16 @@ while True:
                     counter = 1
                     modeType = 1
 
+            # Draw rectangle around the detected face
+            top, right, bottom, left = faceLoc
+            top, right, bottom, left = top * 4, right * 4, bottom * 4, left * 4  # since imgS is resized to 0.25
+            cv2.rectangle(imgBackground, (left + 55, top + 162), (right + 55, bottom + 162), (0, 255, 0), 2)
+
+            # Display student ID above the rectangle
+            text_position = (left + 55, top + 162 - 10)  # Position above the top-left corner of the rectangle
+            cv2.putText(imgBackground, f"ID: {id}", text_position, cv2.FONT_HERSHEY_SIMPLEX, 
+                        1, (255, 255, 255), 2)  # Font size 1, white color, thickness 2
+
         if counter != 0:
             if counter == 1:
                 studentInfo = db.reference(f'Students/{id}').get()
@@ -110,19 +126,28 @@ while True:
 
                 # If no record exists for the day, create a new one
                 if attendance_record is None:
-                    attendance_record = ["A", "A", "A"]  # Default to 'A' for all meals
+                    attendance_record = ["A", "A", "A", "A"]  # Default to 'A' for all meals
 
                 # Determine the current meal slot (breakfast, lunch, dinner)
                 meal_slot = get_meal_slot(current_time)
 
                 if meal_slot is not None:
-                    # Mark the current meal slot as 'P' (Present)
-                    attendance_record[meal_slot] = "P"
+                    # Check if the student already marked in this meal slot
+                    if marked_attendance.get(id, {}).get(meal_slot, False):
+                        print(f"Attendance already marked for meal slot {meal_slot} for {id}")
+                    else:
+                        # Mark the current meal slot as 'P' (Present)
+                        attendance_record[meal_slot] = "P"
 
-                    # Update the attendance for the day in Firebase
-                    attendance_ref.set(attendance_record)
+                        # Update the attendance for the day in Firebase
+                        attendance_ref.set(attendance_record)
 
-                    print(f"Attendance marked for meal slot {meal_slot} for {id}")
+                        print(f"Attendance marked for meal slot {meal_slot} for {id}")
+
+                        # Set the marked flag to True for this student and meal slot
+                        if id not in marked_attendance:
+                            marked_attendance[id] = {}
+                        marked_attendance[id][meal_slot] = True
 
                 counter += 1
 
