@@ -70,13 +70,14 @@ while True:
     imgBackground[162:162 + 480, 55:55 + 640] = img
     resizedModeImage = cv2.resize(imgModeList[modeType], (414, 633))  # Resize here
     imgBackground[44:44 + 633, 808:808 + 414] = resizedModeImage
+    print("stage 1 ")
 
     if faceCurFrame:
         for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
 
 
             # Matches the face with the known faces
-
+            print("stage 2")
 
             matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
             faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
@@ -85,10 +86,12 @@ while True:
 
             matchIndex = np.argmin(faceDis)
             # print("Match Index", matchIndex)
+            print("stage 3")
 
             if matches[matchIndex]:
                 # print("Known Face Detected")
                 # print(studentIds[matchIndex])
+                print("stage 4")
                 y1, x2, y2, x1 = faceLoc
                 y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
                 bbox = 55 + x1, 162 + y1, x2 - x1, y2 - y1

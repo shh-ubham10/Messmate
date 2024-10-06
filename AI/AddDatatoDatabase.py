@@ -51,6 +51,15 @@ data = {
             "standing": "G",
             "year": 4,
             "last_attendance_time": "2024-7-7 00:54:34"
+        },
+        "10321210144":{
+            "name":"Rakesh",
+            "major":"Computer science",
+            "starting_year":2019,
+            "total_attendance":5,
+            "standing":"G",
+            "year":4,
+            "last_attendance_time":"2024-7-7 00:54:34"
         }
         
 }
