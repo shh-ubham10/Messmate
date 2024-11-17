@@ -1,4 +1,5 @@
-
+from io import BytesIO
+from PIL import Image
 import os
 import pickle
 import numpy as np
@@ -10,12 +11,13 @@ from firebase_admin import db
 from firebase_admin import storage
 import numpy as np
 from datetime import datetime,time
+import requests
 
 # Define time slots for meals
 breakfast_time = (time(8, 0), time(9, 30))
-lunch_time = (time(12, 30), time(14, 0))
+lunch_time = (time(10, 30), time(14, 0))
 snack_time = (time(17,0), time(20,5))
-dinner_time = (time(20, 20), time(21, 30))
+dinner_time = (time(20, 20), time(23, 30))
 
 
 # Firebase Setup
@@ -30,17 +32,26 @@ bucket = storage.bucket()
 
 # Camera Setup
 cap = cv2.VideoCapture(0)
-cap.set(3, 640)
-cap.set(4, 480)
+cap.set(3, 1280)
+cap.set(4, 680)
 
-imgBackground = cv2.imread('./assets/5192479.jpg')
 
 # Background and mode images:
-folderModePath = './assets/Images'
-modePathList = os.listdir(folderModePath)
+
+blob_list = bucket.list_blobs(prefix='Images/')
+
 imgModeList = []
-for path in modePathList:
-    imgModeList.append(cv2.imread(os.path.join(folderModePath, path)))
+
+for blob in blob_list:
+    # Get the download URL for each blob
+    url = blob.public_url
+
+    # Download the image using requests
+    response = requests.get(url)
+    img_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+
+    imgModeList.append(img)
 
 
 
@@ -90,7 +101,6 @@ while True:
     faceCurFrame = face_recognition.face_locations(imgS)
     encodeCurFrame = face_recognition.face_encodings(imgS, faceCurFrame)
 
-    imgBackground[162:162 + 480, 55:55 + 640] = img
 
     if faceCurFrame:
         for encodeFace, faceLoc in zip(encodeCurFrame, faceCurFrame):
@@ -109,11 +119,11 @@ while True:
             # Draw rectangle around the detected face
             top, right, bottom, left = faceLoc
             top, right, bottom, left = top * 4, right * 4, bottom * 4, left * 4  # since imgS is resized to 0.25
-            cv2.rectangle(imgBackground, (left + 55, top + 162), (right + 55, bottom + 162), (0, 255, 0), 2)
+            cv2.rectangle(img, (left + 55, top + 162), (right + 55, bottom + 162), (0, 255, 0), 2)
 
             # Display student ID above the rectangle
             text_position = (left + 55, top + 162 - 10)  # Position above the top-left corner of the rectangle
-            cv2.putText(imgBackground, f"ID: {id}", text_position, cv2.FONT_HERSHEY_SIMPLEX, 
+            cv2.putText(img, f"ID: {id}", text_position, cv2.FONT_HERSHEY_SIMPLEX, 
                         1, (255, 255, 255), 2)  # Font size 1, white color, thickness 2
 
         if counter != 0:
@@ -153,14 +163,9 @@ while True:
 
             if counter >= 20:
                 counter = 0
-                modeType = 0
-                studentInfo = []
-                imgStudent = []
-                imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[modeType]
-
+                
     else:
-        modeType = 0
         counter = 0
 
-    cv2.imshow("Face Attendance", imgBackground)
+    cv2.imshow("Face Attendance", img)
     cv2.waitKey(1)

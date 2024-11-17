@@ -4,6 +4,10 @@ import axios from "../../Api/axios";
 import useAuth from "../../Auth/useAuth";
 import ConsentModal from "./ConsentModal";
 var isBetween = require("dayjs/plugin/isBetween");
+var utc = require("dayjs/plugin/utc");
+var customParseFormat = require("dayjs/plugin/customParseFormat");
+
+// Extend dayjs with the UTC plugin
 
 const Attendance = () => {
   const [consentModal, setConsentModal] = useState(false);
@@ -12,12 +16,15 @@ const Attendance = () => {
 
   const { auth } = useAuth();
   dayjs.extend(isBetween);
+  dayjs.extend(utc);
+  dayjs.extend(customParseFormat);
+
   // variables
 
   // today date
   const [today, setToday] = useState({
-    month: 3,
-    year: 2023,
+    month: 11,
+    year: 2024,
   });
 
   const [start, setStart] = useState({
@@ -81,12 +88,17 @@ const Attendance = () => {
       try {
         const userId = auth.userId;
         // const userId = 2007;
-        const response = await axios.get(`/dailyentry/getuserentry/${userId}`, {
-          withCredentials: true,
-        });
-
-        // console.log("Entry ", response.data.attendance);
-        setEntry(response.data.attendance);
+        const data = await fetch(
+          `http://localhost:5000/encode/attendance/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const response = await data.json();
+        setEntry(response.attendance);
       } catch (err) {
         console.log(err);
       }
@@ -109,9 +121,9 @@ const Attendance = () => {
           }
         );
         // console.log("Curr Plan ",dayjs(planResponse.data.start_date).get("date"));
+        console.log("planResponse:  ", planResponse.data.start_date);
         const curr_start = dayjs(planResponse.data.start_date);
         const curr_end = dayjs(planResponse.data.end_date);
-        console.log("Curr Plan ", planResponse.data);
         setStart({
           date: curr_start.get("date"),
           month: curr_start.get("month"),
@@ -180,30 +192,41 @@ const Attendance = () => {
     var breakfast = false;
     var lunch = false;
     var dinner = false;
-    for (let index = 0; index < entry.length; index++) {
-      var entrydate = new Date(entry[index].date);
-      entrydate = dayjs()
-        .year(entrydate.getFullYear())
-        .month(entrydate.getMonth())
-        .date(entrydate.getDate())
-        .format();
 
-      if (entrydate === check) {
-        if (entry[index].menu.breakfast) {
-          breakfast = true;
+    if (entry && typeof entry === "object") {
+      // Iterate over the keys (dates) in the entry object
+      const dates = Object.keys(entry);
+
+      for (const date of dates) {
+        const entryDate = dayjs(date, "DD-MM-YYYY", true).endOf("day").utc();
+
+        const checkDate = dayjs(check).utc().endOf("day");
+
+        if (entryDate.isSame(checkDate, "day")) {
+          console.log("Match found for date:", date);
+
+          const attendanceRecord = entry[date];
+          if (attendanceRecord[0] === "P") {
+            breakfast = true;
+          }
+          if (attendanceRecord[1] === "P") {
+            lunch = true;
+            console.log("Lunch found for date:", date);
+          }
+          if (attendanceRecord[3] === "P") {
+            dinner = true;
+          }
+          break;
         }
-        if (entry[index].menu.lunch) {
-          lunch = true;
-        }
-        if (entry[index].menu.dinner) {
-          dinner = true;
-        }
-        break;
       }
+    } else {
+      console.error("Entry is not valid:", entry);
     }
 
     return item.getMonth() !== today.month - 1 ? (
-      <div className={` cursor-pointer flex w-[30px]  md:w-full mt-[1px] md:mt-4 justify-center`}>
+      <div
+        className={` cursor-pointer flex w-[30px]  md:w-full mt-[1px] md:mt-4 justify-center`}
+      >
         <button
           onClick={
             consent
@@ -243,7 +266,9 @@ const Attendance = () => {
         </button>
       </div>
     ) : (
-      <div className={`md:px-2 md:py-2 p-[2px] cursor-pointer max-w-[20px] md:mb-4  flex md:w-full justify-center `}>
+      <div
+        className={`md:px-2 md:py-2 p-[2px] cursor-pointer max-w-[20px] md:mb-4  flex md:w-full justify-center `}
+      >
         <button
           onClick={
             consent
@@ -325,7 +350,8 @@ const Attendance = () => {
     "July",
     "August",
     "September",
-    "Octomber",
+    "October",
+    "November",
     "December",
   ];
   return (
@@ -348,7 +374,7 @@ const Attendance = () => {
                 tabIndex={0}
                 className="focus:outline-none  text-base font-bold  text-gray-800"
               >
-                {monthname[today.month]} - {today.year}
+                {monthname[today.month - 1]} - {today.year}
               </span>
               <div className="flex items-center">
                 <button
@@ -409,27 +435,27 @@ const Attendance = () => {
             <div className="grid items-center grid-cols-7 max-w-full	justify-between pt-12 overflow-x-auto flex-[8] ">
               <div className=" w-[30px] md:w-full  mb-3 flex justify-center">
                 <p className="text-lg  text-center text-gray-800 font-semibold">
-                  Su
+                  Sun
                 </p>
               </div>
               <div className="w-[30px] md:w-full mb-3 flex justify-center">
                 <p className="text-lg  text-center text-gray-800 font-semibold">
-                  mo
+                  Mon
                 </p>
               </div>
               <div className="w-[30px] md:w-full mb-3 flex justify-center">
                 <p className="text-lg  text-center text-gray-800 font-semibold">
-                  tu
+                  Tue
                 </p>
               </div>
               <div className="w-[30px] md:w-full mb-3 flex justify-center">
                 <p className="text-lg  text-center text-gray-800 font-semibold">
-                  wed
+                  Wed
                 </p>
               </div>
               <div className="w-[30px] md:w-full mb-3 flex justify-center">
                 <p className="text-lg  text-center text-gray-800 font-semibold">
-                  thu
+                  Thu
                 </p>
               </div>
               <div className="w-[30px] md:w-full mb-3 flex justify-center">
@@ -477,7 +503,7 @@ const Attendance = () => {
                   <div className="md:min-h-[25px] max-h-[12px] min-w-[12px] md:min-w-[25px] md:mt-0  mt-[6px] rounded-xl bg-lime-300 "></div>{" "}
                   <span className="text-base text-black font-semibold">
                     {" "}
-                    Current Plane
+                    Current Plan
                   </span>
                 </div>
               </div>

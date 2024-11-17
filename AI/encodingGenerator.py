@@ -24,7 +24,6 @@ for path in pathList:
     imgList.append(cv2.imread(os.path.join(folderPath, path)))
     studentIds.append(os.path.splitext(path)[0])
 
-    # Modify the fileName to remove './assets' and only keep 'Images/x.jpg'
     fileName = f'Images/{path}'
     bucket = storage.bucket()
     blob = bucket.blob(fileName)

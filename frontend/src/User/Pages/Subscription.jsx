@@ -107,7 +107,7 @@ const Subscription = () => {
                   If You Select Any Plan then it Starts from Tomorrow
                 </span>
               </p>
-              {/* <div className="flex mx-auto border-2 border-red-500 rounded overflow-hidden mt-6">
+              <div className="flex mx-auto border-2 border-red-500 rounded overflow-hidden mt-6">
                 {plans.map((plan) => {
                   return plan.plan_type === "Monthly" ? (
                     <button className="py-1 px-4 hover:bg-red-600 hover:text-white border-r-2 border-red-500 focus:outline-none">
@@ -123,7 +123,7 @@ const Subscription = () => {
                     </button>
                   );
                 })}
-              </div> */}
+              </div>
             </div>
             <div className="flex flex-wrap justify-around	">
               {plans.map((plan) => {
@@ -146,8 +146,10 @@ const Subscription = () => {
                       <button
                         className="flex items-center mt-auto hover:border-black  hover:border-2 text-black bg-gradient-to-r from-[#f953c6] to-[#b91d73] font-semibold  py-2 px-4 w-full focus:outline-none hover:bg-red-600 rounded"
                         onClick={() => {
-                          if (window.confirm("Confirm the subcription "))
+                          if (window.confirm("Confirm the subcription ")) {
+                            console.log(plan);
                             takeSubscription(plan.plan_price, plan.planId);
+                          }
                         }}
                       >
                         Get Subscription

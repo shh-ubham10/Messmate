@@ -32,59 +32,48 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route element={<PersistentLogin />}>
-            <Route path="/" element={<Main />}>
-              <Route path="" element={<Home />}></Route>
-              <Route path="/menu" element={<MenuHome />}></Route>
-              <Route path="/contact" element={<Contact />}></Route>
-              <Route path="/about" element={<Aboutus />}></Route>
-            </Route>
+              <Route path="/" element={<Main />}>
+                <Route path="" element={<Home />}></Route>
+                <Route path="/menu" element={<MenuHome />}></Route>
+                <Route path="/contact" element={<Contact />}></Route>
+                <Route path="/about" element={<Aboutus />}></Route>
+              </Route>
               <Route element={<RequireAuth accessRole={1} />}>
                 <Route path="/admin" element={<Admin />}>
-                <Route path='' element={<Dashboad />}></Route>
+                  <Route path="" element={<Dashboad />}></Route>
 
-                  <Route path="attendance" element={<Dailyentry />}>
-                  </Route>
-                  <Route path="qrattendance" element={<QrAttendance />}>
-                  </Route>
-                  <Route path="adduser" element={<Adduser />}>
-                  </Route>
-                  <Route path="inventory" element={<Inventory />}>
-                  </Route>
-                  <Route path="alluser" element={<Alluser />}>
-                  </Route>
-                  <Route path="menu" element={<Menu />}>
-                  </Route>
+                  <Route path="details" element={<Dailyentry />}></Route>
+                  <Route
+                    path="attendanceDetail"
+                    element={<QrAttendance />}
+                  ></Route>
+                  <Route path="adduser" element={<Adduser />}></Route>
+                  <Route path="inventory" element={<Inventory />}></Route>
+                  <Route path="alluser" element={<Alluser />}></Route>
+                  <Route path="menu" element={<Menu />}></Route>
                 </Route>
               </Route>
               <Route element={<RequireAuth accessRole={2} />}>
                 <Route path="/employee" element={<Employee />}>
-                <Route path='' element={<Dashboad />}></Route>
+                  <Route path="" element={<Dashboad />}></Route>
 
-                  <Route path="qrattendance" element={<QrAttendance />}>
-                  </Route>
-                  <Route path="menu" element={<Menu />}>
-                  </Route>
+                  <Route path="attendance" element={<QrAttendance />}></Route>
+                  <Route path="menu" element={<Menu />}></Route>
                 </Route>
               </Route>
               <Route element={<RequireAuth accessRole={0} />}>
                 <Route path="/user" element={<User />}>
-                  <Route path="" element={<ProfileScanner />}>
-                  </Route>
-                  <Route path="editprofile" element={<EditProfile />}>
-                  </Route>
-                  <Route path="subscription" element={<Subscription />}>
-                  </Route>
-                  <Route path="usermenu" element={<UserMenu />}>
-                  </Route>
+                  <Route path="" element={<ProfileScanner />}></Route>
+                  <Route path="editprofile" element={<EditProfile />}></Route>
+                  <Route path="subscription" element={<Subscription />}></Route>
+                  <Route path="usermenu" element={<UserMenu />}></Route>
 
                   <Route path="attendance" element={<Attendance />} />
-                  <Route path="information" element={<Info />}>
-                  </Route>
+                  <Route path="information" element={<Info />}></Route>
                 </Route>
               </Route>
             </Route>
-            <Route path="/unauthorized" element={<Unauthorized />}>
-            </Route>
+            <Route path="/unauthorized" element={<Unauthorized />}></Route>
           </Routes>
         </BrowserRouter>
       </div>

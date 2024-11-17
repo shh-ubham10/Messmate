@@ -19,6 +19,8 @@ dotenv.config();
 
 // connect to a database
 import Connection from "./database/db_connect.js";
+Connection();
+
 import UserPlan from "./Models/UserPlan.js";
 import moment from "moment/moment.js";
 import Inventory from "./Models/Inventory.js";
@@ -42,8 +44,6 @@ app.use("/stats", statisticsRoute);
 app.use("/inventory", inventoryRoute);
 
 // get requests
-
-Connection();
 
 app.get("/", async (req, res) => {
   const today_date = moment().utcOffset("+05:30").startOf("month").toDate();

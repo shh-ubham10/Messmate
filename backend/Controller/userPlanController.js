@@ -170,30 +170,19 @@ export const getConsent = asyncHandler(async (req, res) => {
 
 export const getUserTodayPlan = asyncHandler(async (req, res) => {
   const userId = req.params.userId;
-  var today_date = new Date();
-  today_date = moment(today_date).utcOffset("+05:30").startOf("day").toDate();
-  console.log(today_date);
-  const user = await UserPlan.find(
-    {
-      userId: userId,
-      start_date: { $lte: today_date },
-      end_date: { $gte: today_date },
-      "isavailable.date": today_date,
-    },
-    {
-      _id: 0,
-      userId: 1,
-      planId: 1,
-      fees: 1,
-      fee_status: 1,
-      isavailable: { $elemMatch: { date: today_date } },
-    }
-  );
-  // console.log(user);
-  if (!user) {
+  const today = new Date().toISOString(); // Get today's date in ISO format
+  console.log(today);
+
+  const user = await UserPlan.find({
+    userId: userId,
+    start_date: { $lte: today }, // Check if start_date is less than or equal to today
+    end_date: { $gte: today }, // Check if end_date is greater than or equal to today
+  });
+
+  // Check if user is an empty array
+  if (!user || user.length === 0) {
     return res.status(400).json({ message: "No users found" });
   }
-
   res.json(user);
 });
 
