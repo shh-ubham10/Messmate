@@ -27,7 +27,7 @@ const AddInventory = () => {
     if (e1 || e2 || !e3 || !e4) {
       setalert({
         mode: true,
-        message: "Invallid entry",
+        message: "Invalid entry",
         type: "bg-[red]",
       });
       return;

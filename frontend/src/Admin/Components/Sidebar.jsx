@@ -2,7 +2,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import useLogout from "../../Api/Logout";
 /** Svg's */
-import hat from "../../Svg/hat.gif";
 import burger from "../../Svg/burger.gif";
 import logOut from "../../Svg/logout.gif";
 import confused from "../../Svg/confused.gif";
@@ -10,17 +9,18 @@ import verified from "../../Svg/verified.gif";
 import hauntedHouse from "../../Svg/haunted-house.gif";
 import fingerprintScan from "../../Svg/fingerprint-scan.gif";
 import addUser from "../../Svg/User_1_unscreen.gif";
-import  addInventory from "../../Svg/inventoryUnscreen.gif";
-
+import addInventory from "../../Svg/inventoryUnscreen.gif";
 
 function Sidebar() {
   const Location = useLocation();
+  console.log(Location.pathname); // Check what the pathname is when you click
+
   const activecolor = "bg-white shadow-xl ";
   const active1 = Location.pathname === "/admin" ? `${activecolor}` : "";
   const active2 =
-    Location.pathname === "/admin/attendance" ? `${activecolor}` : "";
+    Location.pathname === "/admin/details" ? `${activecolor}` : "";
   const active3 =
-    Location.pathname === "/admin/qrattendance" ? `${activecolor}` : "";
+    Location.pathname === "/admin/attendanceDetail" ? `${activecolor}` : "";
   const active4 = Location.pathname === "/admin/menu" ? `${activecolor}` : "";
   const active5 =
     Location.pathname === "/admin/adduser" ? `${activecolor}` : "";
@@ -67,13 +67,13 @@ function Sidebar() {
         >
           <Link
             className="flex  flex-row justify-start pl-1 pr-2 hover:no-underline  outline-none  shadow-soft-xl text-sm  m-auto items-center whitespace-nowrap rounded-lg   font-semibold "
-            to="/admin/attendance"
+            to="/admin/details"
           >
             <div className="shadow-soft-2xl  mr-2 flex h-[40px] w-[60px] items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-1.5">
               <img src={verified} alt="sdfsd" className="h-[50px] w-[100px]" />
             </div>
             <span className="ml-1 text-[1rem] hidden sm:block text-black hover:text-black">
-              Daily Attendent
+              Plan Details
             </span>
           </Link>
         </li>
@@ -82,13 +82,17 @@ function Sidebar() {
         >
           <Link
             className="flex  flex-row justify-start pl-1 pr-2 hover:no-underline  outline-none  shadow-soft-xl text-sm  m-auto items-center whitespace-nowrap rounded-lg   font-semibold "
-            to="/admin/qrattendance"
+            to="/admin/attendanceDetail"
           >
             <div className="shadow-soft-2xl  mr-2 flex h-[40px] w-[60px] items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-1.5">
-              <img src={fingerprintScan} alt="sdfsd" className="h-[50px] w-[100px]" />
+              <img
+                src={fingerprintScan}
+                alt="sdfsd"
+                className="h-[50px] w-[100px]"
+              />
             </div>
             <span className="ml-1 text-[1rem] hidden sm:block text-black hover:text-black">
-              QR Attendent
+              Attendance
             </span>
           </Link>
         </li>
@@ -116,7 +120,11 @@ function Sidebar() {
             to="/admin/adduser"
           >
             <div className="shadow-soft-2xl  mr-2 flex h-[40px] w-[60px] items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-1.5">
-              <img src={addUser} alt="sdfsd" className="h-[50px] w-[100px] bg-transparent" />
+              <img
+                src={addUser}
+                alt="sdfsd"
+                className="h-[50px] w-[100px] bg-transparent"
+              />
             </div>
             <span className="ml-1 text-[1rem] hidden sm:block text-black hover:text-black">
               Add user
@@ -131,7 +139,11 @@ function Sidebar() {
             to="/admin/inventory"
           >
             <div className="shadow-soft-2xl  mr-2 flex h-[40px] w-[60px] items-center justify-center rounded-lg bg-center stroke-0 text-center xl:p-1.5">
-              <img src={addInventory} alt="sdfsd" className="h-[50px] w-[100px]" />
+              <img
+                src={addInventory}
+                alt="sdfsd"
+                className="h-[50px] w-[100px]"
+              />
             </div>
             <span className="ml-1 text-[1rem] hidden sm:block text-black hover:text-black">
               Inventory
@@ -144,7 +156,7 @@ function Sidebar() {
             Account pages
           </h6>
         </li>
-<hr class="bg-black mt-3 hidden sm:block" />
+        <hr class="bg-black mt-3 hidden sm:block" />
         <li
           className={`w-[80%]  p-[1.2px]  mt-4 mx-auto py-[0.5rem]  rounded-xl ${active7}`}
         >

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import useAuth from "../../Auth/useAuth";
 import axios from "../../Api/axios";
@@ -12,7 +12,7 @@ const ProfileScanner = () => {
   useEffect(() => {
     const getCurrentPlan = async () => {
       const userId = auth.userId;
-
+      console.log(userId);
       try {
         const planResponse = await axios.get(
           `/userplan/getusertodayplan/${userId}`,
@@ -21,11 +21,14 @@ const ProfileScanner = () => {
           }
         );
 
-        console.log(planResponse.data[0].isavailable[0].dinner);
-        const isTodayBreakfast = planResponse.data[0].isavailable[0].breakfast;
-        const isTodayLunch = planResponse.data[0].isavailable[0].lunch;
-        const isTodayDinner = planResponse.data[0].isavailable[0].dinner;
-        var planDataObject;
+        const isTodayBreakfast =
+          planResponse.data[0]?.isavailable[0]?.breakfast || false;
+        const isTodayLunch =
+          planResponse.data[0]?.isavailable[0]?.lunch || false;
+        const isTodayDinner =
+          planResponse.data[0]?.isavailable[0]?.dinner || false;
+        let planDataObject;
+
         if (planResponse.data.length !== 0) {
           planDataObject = {
             planId: planResponse.data[0].planId,
@@ -44,7 +47,6 @@ const ProfileScanner = () => {
             isTodayLunch: "",
             isTodayDinner: "",
           };
-          console.log(planDataObject);
         }
 
         setPlan(planDataObject);
@@ -52,11 +54,15 @@ const ProfileScanner = () => {
         console.log(error);
       }
     };
+
     getCurrentPlan();
-  }, []);
+  }, [auth]);
 
   useEffect(() => {
+    if (!plan) return; // Ensure plan is available before proceeding
+
     const generateQrCode = async () => {
+      console.log(plan.planId);
       const dataObject = JSON.stringify({
         userId: auth.userId,
         name: auth.name,
@@ -68,8 +74,6 @@ const ProfileScanner = () => {
         isTodayLunch: plan.isTodayLunch,
         isTodayDinner: plan.isTodayDinner,
       });
-      //   console.log(auth);
-      console.log(dataObject);
 
       try {
         const response = await QRCode.toDataURL(dataObject);
@@ -80,7 +84,7 @@ const ProfileScanner = () => {
     };
 
     generateQrCode();
-  });
+  }, [plan, auth]);
 
   return (
     <div className="profilescanner m-auto flex items-center justify-center  h-[40rem]">
@@ -89,7 +93,11 @@ const ProfileScanner = () => {
           <a href={imageUrl} download>
             <img src={imageUrl} alt="img" className="w-[20rem]" />
           </a>
-        ) : <h1 className="text-black text-center text-4xl font-semibold "> Please take the  Subcription Plan ....  </h1>}
+        ) : (
+          <h1 className="text-black text-center text-4xl font-semibold">
+            Please take the Subscription Plan...
+          </h1>
+        )}
       </div>
     </div>
   );

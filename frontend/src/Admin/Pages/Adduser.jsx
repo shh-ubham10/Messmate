@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import SignupPhoto from "../../Svg/Signup.png";
-import { useEffect, useRef, useState } from "react";
 import axios from "../../Api/axios";
 import Alert from "../../Components/Alert";
 
@@ -15,23 +14,20 @@ const Adduser = () => {
   });
 
   const [name, setName] = useState("");
-
   const [email, setEmail] = useState("");
+  const [regId, setRegId] = useState("");
   const [validEmail, setValidEmail] = useState(false);
-
   const [mobileno, setMobileNo] = useState();
   const [validMobile, setValidMobile] = useState(false);
-
   const [role, setRole] = useState(0);
-
   const [password, setPassword] = useState("");
   const [validPassword, setValidPassword] = useState(false);
-
   const [cpassword, setCPassword] = useState("");
   const [validCPasswd, setValidCPasswd] = useState(false);
-
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const [image, setImage] = useState(null); // Added state for image file
 
   // validation in all fields
   useEffect(() => {
@@ -39,7 +35,7 @@ const Adduser = () => {
   }, [email]);
 
   useEffect(() => {
-    setValidEmail(Mobile_Cheker.test(mobileno));
+    setValidMobile(Mobile_Cheker.test(mobileno));
   }, [mobileno]);
 
   useEffect(() => {
@@ -54,39 +50,77 @@ const Adduser = () => {
   // handling submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if button enabled with JS hack
     const e1 = Email_Checker.test(email);
     const e2 = validPassword;
     if (!e1 || !e2) {
       setErrMsg("Invalid Entry");
       return;
     }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("mobileno", mobileno);
+    formData.append("role", role);
+    formData.append("password", password);
+    formData.append("cpassword", cpassword);
+    formData.append("regId", regId);
+    if (image) {
+      formData.append("image", image);
+    }
+
     try {
-      const response = await axios.post(
-        "/users/signup",
-        JSON.stringify({ name, email, mobileno, role, password, cpassword }),
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+      const response = await axios.post("/users/signup", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
 
       console.log(JSON.stringify(response?.data));
-      //console.log(JSON.stringify(response))
       setSuccess(true);
 
-      //clear state and controlled inputs
+      // Clear state and controlled inputs
       setName("");
       setEmail("");
+      setRegId("");
       setMobileNo("");
       setRole(0);
       setPassword("");
       setCPassword("");
+      setImage(null);
       setalert({
         mode: true,
         message: "User registered successfully",
         type: "bg-[green]",
       });
+
+      // Call the encoding generation API
+      try {
+        const encodeResponse = await fetch(
+          "http://localhost:5000/encode/generate_encodings",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!encodeResponse.ok) {
+          throw new Error("Failed to generate encoding");
+        }
+
+        const encodeData = await encodeResponse.json();
+        console.log("Encoding response:", encodeData);
+      } catch (encodeError) {
+        console.error("Error generating encodings:", encodeError);
+        setalert({
+          mode: true,
+          message: "Encoding generation failed",
+          type: "bg-[red]",
+        });
+      }
     } catch (err) {
       if (!err?.response) {
         setalert({
@@ -115,7 +149,7 @@ const Adduser = () => {
       <section className="text-gray-600 body-font">
         {alert.mode ? <Alert alert={alert} setalert={setalert} /> : ""}
         <div className="container mx-auto flex flex-wrap items-center justify-between">
-          <div className="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0  flex-[5] pr-4">
+          <div className="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 flex-[5] pr-4">
             <img
               src={SignupPhoto}
               aria-hidden
@@ -123,7 +157,7 @@ const Adduser = () => {
               alt="Photo coming please wait"
             />
           </div>
-          <div className="lg:w-2/6 md:w-1/2 p-9 ml-8 bg-gray-100 rounded-lg  flex flex-[5] flex-col md:ml-auto w-full mt-10 md:mt-0">
+          <div className="lg:w-2/6 md:w-1/2 p-9 ml-8 bg-gray-100 rounded-lg flex flex-[5] flex-col md:ml-auto w-full mt-10 md:mt-0">
             <h2 className="text-gray-900 text-3xl text-center font-medium title-font ">
               Add user
             </h2>
@@ -144,6 +178,24 @@ const Adduser = () => {
                   className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 />
               </div>
+
+              <div className="relative mb-4">
+                <label
+                  htmlFor="regId"
+                  className="leading-7 text-sm text-gray-600"
+                >
+                  ID
+                </label>
+                <input
+                  type="text"
+                  id="regId"
+                  name="regId"
+                  onChange={(e) => setRegId(e.target.value)}
+                  value={regId}
+                  className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                />
+              </div>
+
               <div className="relative mb-4">
                 <label
                   htmlFor="email"
@@ -160,6 +212,7 @@ const Adduser = () => {
                   className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 />
               </div>
+
               <div className="relative mb-4">
                 <label
                   htmlFor="contact"
@@ -176,19 +229,20 @@ const Adduser = () => {
                   className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 />
               </div>
+
               <div className="relative mb-4">
                 <label
-                  htmlFor="email"
+                  htmlFor="role"
                   className="leading-7 text-sm text-gray-600"
                 >
                   Role
                 </label>
                 <select
-                  id="countries_disabled"
+                  id="role"
                   name="role"
                   onChange={(e) => setRole(e.target.value)}
                   value={role}
-                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 >
                   <option value={0} defaultChecked>
                     User
@@ -197,6 +251,7 @@ const Adduser = () => {
                   <option value={2}> Employee </option>
                 </select>
               </div>
+
               <div className="relative mb-4">
                 <label
                   htmlFor="password"
@@ -213,24 +268,47 @@ const Adduser = () => {
                   className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 />
               </div>
+
               <div className="relative mb-4">
                 <label
-                  htmlFor="password"
+                  htmlFor="cpassword"
                   className="leading-7 text-sm text-gray-600"
                 >
                   Confirm Password
                 </label>
                 <input
-                  type="text"
-                  id="password"
+                  type="password"
+                  id="cpassword"
                   name="cpassword"
                   onChange={(e) => setCPassword(e.target.value)}
                   value={cpassword}
                   className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                 />
               </div>
-              <button className="text-white bg-indigo-600 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-900 rounded text-lg">
-                Create Account
+
+              {/* Image Upload */}
+              <div className="relative mb-4">
+                <label
+                  htmlFor="image"
+                  className="leading-7 text-sm text-gray-600"
+                >
+                  Profile Image
+                </label>
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files[0])}
+                  className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded text-lg"
+              >
+                Add user
               </button>
             </form>
           </div>
